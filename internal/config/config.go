@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	AppEnv      string `required:"true" envconfig:"APP_ENV"`
 	TgBotToken  string `required:"true" envconfig:"TELEGRAM_BOT_TOKEN"`
 	DatabaseUrl string `required:"true" envconfig:"DATABASE_URL"`
 }
