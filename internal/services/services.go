@@ -10,20 +10,32 @@ type Magiceden interface {
 	GetActivitiesOfCollection(collectionName string) []magiceden.CollectionResponse
 }
 
+type (
+	UserRepository interface {
+		Save(user storage.UserDTO) error
+	}
+	CollectionRepository interface {
+		Save(collection storage.CollectionDTO) error
+	}
+)
+
 type Services struct {
-	Config    *config.Config
-	Storage   *storage.Storage
-	Magiceden Magiceden
+	Config     *config.Config
+	Magiceden  Magiceden
+	User       UserRepository
+	Collection CollectionRepository
 }
 
 func New(
 	cfg *config.Config,
-	storage *storage.Storage,
 	magiceden Magiceden,
+	user UserRepository,
+	collection CollectionRepository,
 ) *Services {
 	return &Services{
-		Config:    cfg,
-		Storage:   storage,
-		Magiceden: magiceden,
+		Config:     cfg,
+		Magiceden:  magiceden,
+		User:       user,
+		Collection: collection,
 	}
 }

@@ -31,7 +31,7 @@ func (s Storage) CreateTables() error {
 	collectionsTable := `
 	CREATE TABLE IF NOT EXISTS collections (
 		id UUID PRIMARY KEY,
-		collection_name VARCHAR NOT NULL
+		symbol VARCHAR NOT NULL
 	);`
 
 	usersCollectionsTable := `

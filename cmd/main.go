@@ -11,6 +11,8 @@ import (
 	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden/worker"
 	"github.com/ndfz/solana-nft-notify-bot/internal/services"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage"
+	"github.com/ndfz/solana-nft-notify-bot/internal/storage/collection"
+	"github.com/ndfz/solana-nft-notify-bot/internal/storage/user"
 	"go.uber.org/zap"
 )
 
@@ -44,10 +46,14 @@ func main() {
 
 	magiceden := magiceden.New(config.MagicEdenEndpoint)
 
+	userRepository := user.New(storage.DB)
+	collectionRepository := collection.New(storage.DB)
+
 	services := services.New(
 		config,
-		storage,
 		magiceden,
+		userRepository,
+		collectionRepository,
 	)
 
 	go worker.New(services).Run()
