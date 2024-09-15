@@ -3,11 +3,13 @@ package worker
 import (
 	"time"
 
+	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden"
 	"github.com/ndfz/solana-nft-notify-bot/internal/services"
 	"go.uber.org/zap"
 )
 
 var (
+	NotifyChan   = make(chan magiceden.CollectionResponse)
 	targetAction = "buyNow"
 )
 
@@ -28,12 +30,18 @@ func (w Worker) Run() {
 	// this is just for testing
 	collections := []string{"y00ts", "retardio_cousins"}
 
+	// TODO: rename this to something more descriptive
+	var last magiceden.CollectionResponse
+
 	for {
 		for _, c := range collections {
 			result := w.services.Magiceden.GetActivitiesOfCollection(c)
 			for _, r := range result {
 				if r.Type == targetAction {
-					zap.S().Info(r)
+					if r != last {
+						NotifyChan <- r
+						last = r
+					}
 				}
 			}
 			zap.S().Debug("sleeping " + w.services.Config.CollectionSleep.String())

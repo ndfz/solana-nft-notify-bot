@@ -10,6 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/ndfz/solana-nft-notify-bot/internal/config"
 	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden"
+	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden/worker"
 	"github.com/ndfz/solana-nft-notify-bot/internal/services"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage/collection"
@@ -62,8 +63,8 @@ func main() {
 		collectionRepository,
 	)
 
-	// go worker.New(services).Run()
-	// zap.S().Info("started worker")
+	go worker.New(services).Run()
+	zap.S().Info("started worker")
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()

@@ -15,6 +15,22 @@ var (
 			Name:    "/start",
 			Handler: startCommand,
 		},
+		{
+			Name:    "/help",
+			Handler: helpCommand,
+		},
+		{
+			Name:    "/addcollection",
+			Handler: addCollectionCommand,
+		},
+		{
+			Name:    "/removecollection",
+			Handler: removeCollectionCommand,
+		},
+		{
+			Name:    "/listcollections",
+			Handler: listCollectionsCommand,
+		},
 	}
 )
 
@@ -40,7 +56,8 @@ func New(
 
 func (b TgBot) Start(ctx context.Context) {
 	b.Register()
-	b.tgBot.Start(ctx)
+	go notify()
+	go b.tgBot.Start(ctx)
 }
 
 func (b TgBot) Register() {

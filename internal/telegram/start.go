@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: implement this
 func startCommand(ctx context.Context, b *bot.Bot, update *models.Update) {
 	zap.S().Debugf("%s  command called from: %d (%s)", update.Message.Text, update.Message.From.ID, update.Message.From.Username)
 	b.SendMessage(ctx, &bot.SendMessageParams{
