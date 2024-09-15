@@ -1,18 +1,20 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/go-telegram/bot"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/ndfz/solana-nft-notify-bot/internal/config"
 	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden"
-	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden/worker"
 	"github.com/ndfz/solana-nft-notify-bot/internal/services"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage/collection"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage/user"
+	"github.com/ndfz/solana-nft-notify-bot/internal/telegram"
 	"go.uber.org/zap"
 )
 
@@ -44,6 +46,10 @@ func main() {
 	}
 	zap.S().Info("created tables")
 
+	// opts := bot.Option{
+	//   bot.WithDefaultHandler()
+	// }
+
 	magiceden := magiceden.New(config.MagicEdenEndpoint)
 
 	userRepository := user.New(storage.DB)
@@ -55,8 +61,19 @@ func main() {
 		userRepository,
 		collectionRepository,
 	)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
 
-	go worker.New(services).Run()
+	tgBot, err := bot.New(config.TgBotToken)
+	if err != nil {
+		panic("failed to create bot: " + err.Error())
+	}
+
+	go telegram.New(tgBot, services).Run(ctx)
+	zap.S().Info("started bot")
+
+	// go worker.New(services).Run()
+	// zap.S().Info("started worker")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
