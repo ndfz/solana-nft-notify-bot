@@ -31,7 +31,7 @@ func (s Storage) CreateTables() error {
 	collectionsTable := `
 	CREATE TABLE IF NOT EXISTS collections (
 		id UUID PRIMARY KEY,
-		collection_name VARCHAR NOT NULL
+		symbol VARCHAR NOT NULL
 	);`
 
 	usersCollectionsTable := `
@@ -46,11 +46,9 @@ func (s Storage) CreateTables() error {
 	if _, err := s.DB.Exec(usersTable); err != nil {
 		return fmt.Errorf("failed to create users table: %v", err)
 	}
-
 	if _, err := s.DB.Exec(collectionsTable); err != nil {
 		return fmt.Errorf("failed to create collections table: %v", err)
 	}
-
 	if _, err := s.DB.Exec(usersCollectionsTable); err != nil {
 		return fmt.Errorf("failed to create users_collections table: %v", err)
 	}

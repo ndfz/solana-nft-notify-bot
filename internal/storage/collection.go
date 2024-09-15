@@ -1,8 +1,10 @@
 package storage
 
+type CollectionDTO struct {
+	Symbol string `json:"symbol"`
+}
+
 type Collection struct {
-	ID                string `json:"id"`
-	CollectionName    string `json:"collection_name"`
-	CollectionAddress string `json:"collection_address"`
-	Marketplace       string `json:"marketplace"`
+	ID     string `json:"id"`
+	Symbol string `json:"symbol"`
 }
