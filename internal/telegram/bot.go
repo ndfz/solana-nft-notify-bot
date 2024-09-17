@@ -30,13 +30,39 @@ func (tg TgBot) Start(ctx context.Context) {
 }
 
 func (tg TgBot) Register() {
-	tg.tgBot.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypePrefix, func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		startHandler(ctx, b, update, tg.service)
-	})
-	tg.tgBot.RegisterHandler(bot.HandlerTypeMessageText, "/addcollection", bot.MatchTypePrefix, func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		addCollectionCommand(ctx, b, update, tg.service)
-	})
-	tg.tgBot.RegisterHandler(bot.HandlerTypeMessageText, "/removecollection", bot.MatchTypePrefix, func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		removeCollectionCommand(ctx, b, update, tg.service)
-	})
+	tg.tgBot.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"/start",
+		bot.MatchTypePrefix,
+		func(ctx context.Context, b *bot.Bot, update *models.Update) {
+			startHandler(ctx, b, update, tg.service)
+		})
+	tg.tgBot.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"/addcollection",
+		bot.MatchTypePrefix,
+		func(ctx context.Context, b *bot.Bot, update *models.Update) {
+			addCollectionHandler(ctx, b, update, tg.service)
+		})
+	tg.tgBot.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"/removecollection",
+		bot.MatchTypePrefix,
+		func(ctx context.Context, b *bot.Bot, update *models.Update) {
+			removeCollectionHandler(ctx, b, update, tg.service)
+		})
+	tg.tgBot.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"/listcollections",
+		bot.MatchTypePrefix,
+		func(ctx context.Context, b *bot.Bot, update *models.Update) {
+			listCollectionsHandler(ctx, b, update, tg.service)
+		})
+	tg.tgBot.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"/help",
+		bot.MatchTypePrefix,
+		func(ctx context.Context, b *bot.Bot, update *models.Update) {
+			helpHandler(ctx, b, update)
+		})
 }

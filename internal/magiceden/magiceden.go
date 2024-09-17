@@ -43,7 +43,7 @@ func (m Magiceden) GetActivitiesOfCollection(collectionName string) []Collection
 
 	body, _ := io.ReadAll(res.Body)
 	if err := json.Unmarshal(body, &data); err != nil {
-		zap.S().Errorf("Error parsing JSON: %v", err)
+		zap.S().Errorf("error parsing JSON: %v", err)
 		return nil
 	}
 

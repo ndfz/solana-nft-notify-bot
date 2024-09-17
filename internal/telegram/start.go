@@ -16,14 +16,12 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update, servic
 	}
 	err := service.User.Save(dto)
 	if err != nil {
-		zap.S().Errorf("Error saving user: %v", err)
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Something went wrong!",
-		})
+		if err == storage.ErrUserExists {
+			zap.S().Infof("user already exists: %d", update.Message.From.ID)
+			return
+		} else {
+			zap.S().Errorf("error saving user: %v", err)
+			return
+		}
 	}
-	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   "You are registered!",
-	})
 }

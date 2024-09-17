@@ -17,7 +17,8 @@ type (
 	CollectionRepository interface {
 		Save(collection storage.CollectionDTO) error
 		GetAll() ([]storage.Collection, error)
-		Delete(id string) error
+		GetByTelegramID(telegramID int64) ([]storage.Collection, error)
+		DeleteBySymbol(symbol string) error
 	}
 )
 
