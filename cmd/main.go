@@ -15,6 +15,7 @@ import (
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage/collection"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage/user"
 	"github.com/ndfz/solana-nft-notify-bot/internal/telegram"
+	"github.com/ndfz/solana-nft-notify-bot/internal/worker"
 	"go.uber.org/zap"
 )
 
@@ -46,9 +47,9 @@ func main() {
 	}
 	zap.S().Info("created tables")
 
-	// opts := bot.Option{
-	//   bot.WithDefaultHandler()
-	// }
+	opts := []bot.Option{
+		bot.WithMiddlewares(telegram.ShowCommandWithUserID),
+	}
 
 	magiceden := magiceden.New(config.MagicEdenEndpoint)
 
@@ -61,19 +62,20 @@ func main() {
 		userRepository,
 		collectionRepository,
 	)
+
+	go worker.New(services).Run()
+	zap.S().Info("started worker")
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	tgBot, err := bot.New(config.TgBotToken)
+	tgBot, err := bot.New(config.TgBotToken, opts...)
 	if err != nil {
 		panic("failed to create bot: " + err.Error())
 	}
 
-	go telegram.New(tgBot, services).Run(ctx)
 	zap.S().Info("started bot")
-
-	// go worker.New(services).Run()
-	// zap.S().Info("started worker")
+	telegram.New(tgBot, services).Start(ctx)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)

@@ -23,13 +23,20 @@ func New(
 	}
 }
 
-func (b TgBot) Run(ctx context.Context) {
-	b.tgBot.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Hello!",
-		})
-	})
+func (tg TgBot) Start(ctx context.Context) {
+	tg.Register()
+	go notify()
+	go tg.tgBot.Start(ctx)
+}
 
-	b.tgBot.Start(ctx)
+func (tg TgBot) Register() {
+	tg.tgBot.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypePrefix, func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		startHandler(ctx, b, update, tg.service)
+	})
+	tg.tgBot.RegisterHandler(bot.HandlerTypeMessageText, "/addcollection", bot.MatchTypePrefix, func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		addCollectionCommand(ctx, b, update, tg.service)
+	})
+	tg.tgBot.RegisterHandler(bot.HandlerTypeMessageText, "/removecollection", bot.MatchTypePrefix, func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		removeCollectionCommand(ctx, b, update, tg.service)
+	})
 }

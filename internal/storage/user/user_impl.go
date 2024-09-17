@@ -26,7 +26,7 @@ func (u UserRepositoryImpl) Save(user storage.UserDTO) error {
 	if err != nil {
 		return fmt.Errorf("failed to save user: %v", err)
 	}
-	zap.S().Infof("Saved user: %s" + user.TelegramID)
+	zap.S().Infof("User saved: %d", user.TelegramID)
 
 	return nil
 }

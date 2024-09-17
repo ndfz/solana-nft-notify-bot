@@ -3,12 +3,14 @@ package worker
 import (
 	"time"
 
+	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden"
 	"github.com/ndfz/solana-nft-notify-bot/internal/services"
 	"go.uber.org/zap"
 )
 
 var (
-	targetAction = "buyNow"
+	ActivityUpdates = make(chan magiceden.CollectionResponse)
+	targetType      = "buyNow"
 )
 
 type Worker struct {
@@ -24,16 +26,19 @@ func New(services *services.Services) Worker {
 func (w Worker) Run() {
 	zap.S().Info("starting worker")
 	// TODO: get collections from database
-	//
-	// this is just for testing
 	collections := []string{"y00ts", "retardio_cousins"}
+
+	var lastProcessedActivity magiceden.CollectionResponse
 
 	for {
 		for _, c := range collections {
 			result := w.services.Magiceden.GetActivitiesOfCollection(c)
 			for _, r := range result {
-				if r.Type == targetAction {
-					zap.S().Info(r)
+				if r.Type == targetType {
+					if r != lastProcessedActivity {
+						ActivityUpdates <- r
+						lastProcessedActivity = r
+					}
 				}
 			}
 			zap.S().Debug("sleeping " + w.services.Config.CollectionSleep.String())
