@@ -10,12 +10,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/ndfz/solana-nft-notify-bot/internal/config"
 	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden"
-	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden/worker"
 	"github.com/ndfz/solana-nft-notify-bot/internal/services"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage/collection"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage/user"
 	"github.com/ndfz/solana-nft-notify-bot/internal/telegram"
+	"github.com/ndfz/solana-nft-notify-bot/internal/worker"
 	"go.uber.org/zap"
 )
 

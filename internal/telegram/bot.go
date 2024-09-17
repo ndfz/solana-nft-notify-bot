@@ -9,39 +9,9 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	commands = []Command{
-		{
-			Name:    "/start",
-			Handler: startCommand,
-		},
-		{
-			Name:    "/help",
-			Handler: helpCommand,
-		},
-		{
-			Name:    "/addcollection",
-			Handler: addCollectionCommand,
-		},
-		{
-			Name:    "/removecollection",
-			Handler: removeCollectionCommand,
-		},
-		{
-			Name:    "/listcollections",
-			Handler: listCollectionsCommand,
-		},
-	}
-)
-
 type TgBot struct {
 	tgBot   *bot.Bot
 	service *services.Services
-}
-
-type Command struct {
-	Name    string
-	Handler func(ctx context.Context, b *bot.Bot, update *models.Update)
 }
 
 func New(
@@ -54,15 +24,15 @@ func New(
 	}
 }
 
-func (b TgBot) Start(ctx context.Context) {
-	b.Register()
+func (tg TgBot) Start(ctx context.Context) {
+	tg.Register()
 	go notify()
-	go b.tgBot.Start(ctx)
+	go tg.tgBot.Start(ctx)
 }
 
-func (b TgBot) Register() {
-	for _, c := range commands {
-		b.tgBot.RegisterHandler(bot.HandlerTypeMessageText, c.Name, bot.MatchTypeExact, c.Handler)
-	}
-	zap.S().Debug("Commands registered")
+func (tg TgBot) Register() {
+	tg.tgBot.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypePrefix, func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		zap.S().Debugf("%s  command called from: %d (%s)", update.Message.Text, update.Message.From.ID, update.Message.From.Username)
+		startHandler(ctx, b, update, tg.service)
+	})
 }

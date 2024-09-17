@@ -1,14 +1,13 @@
-// TODO: move to a new notify package
 package telegram
 
 import (
-	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden/worker"
+	"github.com/ndfz/solana-nft-notify-bot/internal/worker"
 	"go.uber.org/zap"
 )
 
 func notify() {
 	for {
-		waitChan := <-worker.NotifyChan
-		zap.S().Info("notify: ", waitChan)
+		activity := <-worker.ActivityUpdates
+		zap.S().Info("notify: ", activity)
 	}
 }
