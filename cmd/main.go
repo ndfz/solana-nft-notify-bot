@@ -47,9 +47,9 @@ func main() {
 	}
 	zap.S().Info("created tables")
 
-	// opts := bot.Option{
-	//   bot.WithDefaultHandler()
-	// }
+	opts := []bot.Option{
+		bot.WithMiddlewares(telegram.ShowCommandWithUserID),
+	}
 
 	magiceden := magiceden.New(config.MagicEdenEndpoint)
 
@@ -69,7 +69,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	tgBot, err := bot.New(config.TgBotToken)
+	tgBot, err := bot.New(config.TgBotToken, opts...)
 	if err != nil {
 		panic("failed to create bot: " + err.Error())
 	}

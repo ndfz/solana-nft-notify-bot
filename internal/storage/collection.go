@@ -1,7 +1,8 @@
 package storage
 
 type CollectionDTO struct {
-	Symbol string `json:"symbol"`
+	TelegramID int64  `json:"telegram_id"`
+	Symbol     string `json:"symbol"`
 }
 
 type Collection struct {
