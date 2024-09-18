@@ -25,7 +25,7 @@ func New(
 
 func (tg TgBot) Start(ctx context.Context) {
 	tg.Register()
-	go notify()
+	go tg.notify(ctx)
 	go tg.tgBot.Start(ctx)
 }
 

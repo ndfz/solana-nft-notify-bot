@@ -64,7 +64,6 @@ func (r CollectionRepositoryImpl) Save(collection storage.CollectionDTO) error {
 	return nil
 }
 
-// TODO: check this function
 func (r CollectionRepositoryImpl) GetAll() ([]storage.Collection, error) {
 	rows, err := r.db.Query("SELECT id, symbol FROM collections")
 	if err != nil {

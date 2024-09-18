@@ -13,6 +13,7 @@ type Magiceden interface {
 type (
 	UserRepository interface {
 		Save(user storage.UserDTO) error
+		GetByCollectionSymbol(symbol string) ([]storage.User, error)
 	}
 	CollectionRepository interface {
 		Save(collection storage.CollectionDTO) error

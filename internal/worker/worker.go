@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"sort"
 	"time"
 
 	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden"
@@ -9,41 +10,71 @@ import (
 )
 
 var (
-	ActivityUpdates = make(chan magiceden.CollectionResponse)
+	ActivityUpdates = make(chan magiceden.CollectionResponse, 1)
 	targetType      = "buyNow"
 )
 
 type Worker struct {
-	services *services.Services
+	services        *services.Services
+	processedEvents map[string]time.Time
+	eventTTL        time.Duration
 }
 
 func New(services *services.Services) Worker {
 	return Worker{
-		services: services,
+		services:        services,
+		processedEvents: make(map[string]time.Time),
+		// TODO: make it configurable
+		eventTTL: 60 * time.Minute,
 	}
 }
 
 func (w Worker) Run() {
-	zap.S().Info("starting worker")
-	// TODO: get collections from database
-	collections := []string{"y00ts", "retardio_cousins"}
-
-	var lastProcessedActivity magiceden.CollectionResponse
-
 	for {
+		collections, err := w.services.Collection.GetAll()
+		if err != nil {
+			zap.S().Error(err)
+		}
+
+		var allActivities []magiceden.CollectionResponse
+
 		for _, c := range collections {
-			result := w.services.Magiceden.GetActivitiesOfCollection(c)
+			zap.S().Debug("processing collection " + c.Symbol)
+			result := w.services.Magiceden.GetActivitiesOfCollection(c.Symbol)
 			for _, r := range result {
 				if r.Type == targetType {
-					if r != lastProcessedActivity {
-						ActivityUpdates <- r
-						lastProcessedActivity = r
+					if _, processed := w.processedEvents[r.Signature]; !processed {
+						allActivities = append(allActivities, r)
+						w.processedEvents[r.Signature] = time.Now()
 					}
 				}
 			}
 			zap.S().Debug("sleeping " + w.services.Config.CollectionSleep.String())
 			time.Sleep(w.services.Config.CollectionSleep)
 		}
+
+		sort.Slice(allActivities, func(i, j int) bool {
+			return allActivities[i].Signature > allActivities[j].Signature
+		})
+
+		for _, activity := range allActivities {
+			zap.S().Debugf(
+				"sending notification for %s, seller %s -> buyer %s, image %s",
+				activity.Signature,
+				activity.Seller,
+				activity.Buyer,
+				activity.Image,
+			)
+			ActivityUpdates <- activity
+		}
+
+		now := time.Now()
+		for id, timestamp := range w.processedEvents {
+			if now.Sub(timestamp) > w.eventTTL {
+				delete(w.processedEvents, id)
+			}
+		}
+
 		zap.S().Debug("sleeping " + w.services.Config.CycleSleep.String())
 		time.Sleep(w.services.Config.CycleSleep)
 	}

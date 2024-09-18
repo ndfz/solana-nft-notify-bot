@@ -40,3 +40,35 @@ func (u UserRepositoryImpl) Save(user storage.UserDTO) error {
 	zap.S().Infof("user saved: %d", user.TelegramID)
 	return nil
 }
+
+func (u UserRepositoryImpl) GetByCollectionSymbol(symbol string) ([]storage.User, error) {
+	query := `
+		SELECT u.id, u.telegram_id, u.created_at
+		FROM users u
+		JOIN users_collections uc ON u.id = uc.user_id
+		JOIN collections c ON uc.collections_id = c.id
+		WHERE c.symbol = $1;
+	`
+
+	rows, err := u.db.Query(query, symbol)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users by collection symbol: %v", err)
+	}
+	defer rows.Close()
+
+	var users []storage.User
+
+	for rows.Next() {
+		var user storage.User
+		if err := rows.Scan(&user.ID, &user.TelegramID, &user.CreatedAt); err != nil {
+			return nil, fmt.Errorf("failed to scan user: %v", err)
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate users: %v", err)
+	}
+
+	return users, nil
+}
