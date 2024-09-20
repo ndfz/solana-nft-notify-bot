@@ -34,7 +34,7 @@ type CollectionResponse struct {
 func (m Magiceden) GetActivitiesOfCollection(collectionName string) []CollectionResponse {
 	var data []CollectionResponse
 
-	url := fmt.Sprintf("%s/collections/%s/activities?offset=0&limit=100", m.magicedenEndpoint, collectionName)
+	url := fmt.Sprintf("%s/collections/%s/activities?offset=0&limit=50", m.magicedenEndpoint, collectionName)
 
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("accept", "application/json")
@@ -47,10 +47,5 @@ func (m Magiceden) GetActivitiesOfCollection(collectionName string) []Collection
 		return nil
 	}
 
-	for _, d := range data {
-		if d.Type == "buyNow" {
-			zap.S().Debugf("buy now from magiceden: %s", d.Signature)
-		}
-	}
 	return data
 }

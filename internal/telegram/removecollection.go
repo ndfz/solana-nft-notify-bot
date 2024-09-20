@@ -15,12 +15,12 @@ func removeCollectionHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 		zap.S().Errorf("Error removing collection: %v", err)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   "Error removing collection!",
+			Text:   "⚠️ An error occurred while removing the collection.",
 		})
 		return
 	}
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
-		Text:   "Remove collection!",
+		Text:   "✅ Collection successfully removed! You will no longer receive updates for it.",
 	})
 }

@@ -43,6 +43,7 @@ func (w Worker) Run() {
 			result := w.services.Magiceden.GetActivitiesOfCollection(c.Symbol)
 			for _, r := range result {
 				if r.Type == targetType {
+					zap.S().Debugf("buy now from magiceden: %s", r.Signature)
 					if _, processed := w.processedEvents[r.Signature]; !processed {
 						allActivities = append(allActivities, r)
 						w.processedEvents[r.Signature] = time.Now()

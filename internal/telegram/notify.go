@@ -10,7 +10,6 @@ import (
 	"github.com/ndfz/solana-nft-notify-bot/internal/worker"
 )
 
-// TODO: make a clear message
 func (tg TgBot) notify(ctx context.Context) {
 	for {
 		activity := <-worker.ActivityUpdates
@@ -19,28 +18,27 @@ func (tg TgBot) notify(ctx context.Context) {
 		for _, user := range users {
 			message := fmt.Sprintf(
 				"📢 *New NFT Sale Alert!*\n\n"+
-					"*Collection:* %s\n"+
-					"*NFT Token:* %s\n"+
-					"*Seller:* %s\n"+
-					"*Buyer:* %s\n"+
-					"*Price:* %.2f SOL\n\n"+
-					"*Transaction Signature:* %s\n"+
-					"*Collection Symbol:* %s\n\n"+
-					"🔗 [View on Magic Eden](https://magiceden.io/marketplace/%s)",
+					"🏷 *Collection:* %s\n"+
+					"🖼 *NFT Token:* %s\n"+
+					"👤 *Seller:* %s\n"+
+					"🎉 *Buyer:* %s\n"+
+					"💰 *Price:* %.3f SOL\n\n"+
+					"🔗 *Transaction:* [%s](https://solscan.io/tx/%s)\n"+
+					"🌐 *View Collection:* [%s](https://magiceden.io/marketplace/%s)\n",
 				activity.Collection,
 				activity.TokenMint,
 				activity.Seller,
 				activity.Buyer,
 				activity.Price,
 				activity.Signature,
-				activity.CollectionSymbol,
+				activity.Signature,
+				activity.Collection,
 				activity.CollectionSymbol,
 			)
 
 			if activity.Image != "" {
 				_, err := tg.tgBot.SendPhoto(ctx, &bot.SendPhotoParams{
-					ChatID: user.TelegramID,
-					// FIX: Bad Request: wrong file identifier/HTTP URL specified
+					ChatID:    user.TelegramID,
 					Photo:     &models.InputFileString{Data: activity.Image},
 					Caption:   message,
 					ParseMode: models.ParseModeMarkdownV1,

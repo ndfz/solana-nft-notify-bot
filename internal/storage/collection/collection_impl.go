@@ -116,7 +116,7 @@ func (r CollectionRepositoryImpl) GetByTelegramID(telegramID int64) ([]storage.C
 	}
 
 	if len(collections) == 0 {
-		return nil, fmt.Errorf("no collections found for user %d", telegramID)
+		return nil, storage.ErrNoCollectionsFound
 	}
 
 	return collections, nil

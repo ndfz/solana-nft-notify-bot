@@ -25,10 +25,14 @@ func main() {
 		panic("failed to load config: " + err.Error())
 	}
 
-	logger := zap.Must(zap.NewProduction())
+	var logger *zap.Logger
+
 	if os.Getenv("APP_ENV") == "development" {
 		logger = zap.Must(zap.NewDevelopment())
 		logger.Debug("development mode")
+	} else {
+		logger = zap.Must(zap.NewProduction())
+		logger.Info("production mode")
 	}
 	defer logger.Sync()
 
