@@ -3,6 +3,7 @@ package telegram
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -17,7 +18,7 @@ func listCollectionsHandler(ctx context.Context, b *bot.Bot, update *models.Upda
 		if err == storage.ErrNoCollectionsFound {
 			b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
-				Text:   "❌ You don't have any collections saved yet.",
+				Text:   "🤔 You don't have any collections saved yet.",
 			})
 			return
 		} else {
@@ -32,11 +33,13 @@ func listCollectionsHandler(ctx context.Context, b *bot.Bot, update *models.Upda
 
 	var collections []string
 	for _, collection := range collectionsFromDB {
-		collections = append(collections, collection.Symbol)
+		collections = append(collections, fmt.Sprintf("%s", collection.Symbol))
 	}
+
+	messageText := fmt.Sprintf("📦 Here are your saved collections:\n%s", strings.Join(collections, "\n"))
 
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
-		Text:   fmt.Sprintf("📂 Here are your saved collections:\n%v", collections),
+		Text:   messageText,
 	})
 }
