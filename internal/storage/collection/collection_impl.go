@@ -5,15 +5,16 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage"
 	"go.uber.org/zap"
 )
 
 type CollectionRepositoryImpl struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func New(db *sql.DB) CollectionRepositoryImpl {
+func New(db *sqlx.DB) CollectionRepositoryImpl {
 	return CollectionRepositoryImpl{
 		db: db,
 	}
@@ -22,14 +23,13 @@ func New(db *sql.DB) CollectionRepositoryImpl {
 func (r CollectionRepositoryImpl) Save(collection storage.CollectionDTO) error {
 	var collectionID uuid.UUID
 
-	err := r.db.QueryRow("SELECT id FROM collections WHERE symbol = ?", collection.Symbol).Scan(&collectionID)
+	err := r.db.QueryRow("SELECT id FROM collections WHERE symbol = $1", collection.Symbol).Scan(&collectionID)
 	if err != nil && err != sql.ErrNoRows {
 		return fmt.Errorf("failed to check existing collection: %v", err)
 	}
 
 	if err == sql.ErrNoRows {
-		collectionID = uuid.New()
-		_, err = r.db.Exec("INSERT INTO collections (id, symbol) VALUES (?, ?)", collectionID, collection.Symbol)
+		err = r.db.QueryRow("INSERT INTO collections (symbol) VALUES ($1) RETURNING id", collection.Symbol).Scan(&collectionID)
 		if err != nil {
 			return fmt.Errorf("failed to save collection: %v", err)
 		}
@@ -39,26 +39,25 @@ func (r CollectionRepositoryImpl) Save(collection storage.CollectionDTO) error {
 	}
 
 	var userID uuid.UUID
-	err = r.db.QueryRow("SELECT id FROM users WHERE telegram_id = ?", collection.TelegramID).Scan(&userID)
+	err = r.db.QueryRow("SELECT id FROM users WHERE telegram_id = $1", collection.TelegramID).Scan(&userID)
 	if err != nil {
 		return fmt.Errorf("failed to find user by telegram_id: %v", err)
 	}
 
 	var userCollectionID uuid.UUID
-	err = r.db.QueryRow("SELECT id FROM users_collections WHERE user_id = ? AND collections_id = ?", userID, collectionID).Scan(&userCollectionID)
+	err = r.db.QueryRow("SELECT id FROM users_collections WHERE user_id = $1 AND collections_id = $2", userID, collectionID).Scan(&userCollectionID)
 	if err != nil && err != sql.ErrNoRows {
 		return fmt.Errorf("failed to check existing user-collection relationship: %v", err)
 	}
 
 	if err == sql.ErrNoRows {
-		uuidUserCollection := uuid.New()
-		_, err = r.db.Exec("INSERT INTO users_collections (id, user_id, collections_id) VALUES (?, ?, ?)", uuidUserCollection, userID, collectionID)
+		_, err = r.db.Exec("INSERT INTO users_collections (user_id, collections_id) VALUES ($1, $2)", userID, collectionID)
 		if err != nil {
 			return fmt.Errorf("failed to save user-collection relationship: %v", err)
 		}
-		zap.S().Infof("user-Collection relationship saved: User %d - Collection %s", collection.TelegramID, collection.Symbol)
+		zap.S().Infof("user-Collection relationship saved: User %s - Collection %s", collection.TelegramID, collection.Symbol)
 	} else {
-		zap.S().Infof("user-Collection relationship already exists: User %d - Collection %s", collection.TelegramID, collection.Symbol)
+		zap.S().Infof("user-Collection relationship already exists: User %s - Collection %s", collection.TelegramID, collection.Symbol)
 	}
 
 	return nil
@@ -123,7 +122,7 @@ func (r CollectionRepositoryImpl) GetByTelegramID(telegramID int64) ([]storage.C
 }
 
 func (r CollectionRepositoryImpl) DeleteBySymbol(symbol string) error {
-	result, err := r.db.Exec("DELETE FROM collections WHERE symbol = ?", symbol)
+	result, err := r.db.Exec("DELETE FROM collections WHERE symbol = $1", symbol)
 	if err != nil {
 		return fmt.Errorf("failed to delete collection with symbol %s: %v", symbol, err)
 	}

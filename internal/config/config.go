@@ -14,7 +14,7 @@ type Config struct {
 	CollectionSleep   time.Duration `required:"true" envconfig:"COLLECTION_SLEEP"`
 	CycleSleep        time.Duration `required:"true" envconfig:"CYCLE_SLEEP"`
 	TgBotToken        string        `required:"true" envconfig:"TELEGRAM_BOT_TOKEN"`
-	DatabaseName      string        `required:"true" envconfig:"DATABASE_NAME"`
+	DatabaseUrl       string        `required:"true" envconfig:"DATABASE_URL"`
 	MagicEdenEndpoint string        `required:"true" envconfig:"MAGIC_EDEN_ENDPOINT"`
 }
 

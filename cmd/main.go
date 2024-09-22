@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/go-telegram/bot"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 	"github.com/ndfz/solana-nft-notify-bot/internal/config"
 	"github.com/ndfz/solana-nft-notify-bot/internal/magiceden"
 	"github.com/ndfz/solana-nft-notify-bot/internal/services"
@@ -39,17 +39,12 @@ func main() {
 	zap.ReplaceGlobals(logger)
 	zap.S().Info("starting solana-nft-notify-bot")
 
-	storage, err := storage.New(config.DatabaseName)
+	storage, err := storage.New(config.DatabaseUrl)
 	if err != nil {
 		panic("failed to open database: " + err.Error())
 	}
-	defer storage.DB.Close()
-	zap.S().Info("connected to SQLite database")
-	err = storage.CreateTables()
-	if err != nil {
-		panic("failed to create tables: " + err.Error())
-	}
-	zap.S().Info("created tables")
+	defer storage.Close()
+	zap.S().Info("connected to postgresql")
 
 	opts := []bot.Option{
 		bot.WithMiddlewares(telegram.ShowCommandWithUserID),
@@ -57,8 +52,8 @@ func main() {
 
 	magiceden := magiceden.New(config.MagicEdenEndpoint)
 
-	userRepository := user.New(storage.DB)
-	collectionRepository := collection.New(storage.DB)
+	userRepository := user.New(storage)
+	collectionRepository := collection.New(storage)
 
 	services := services.New(
 		config,

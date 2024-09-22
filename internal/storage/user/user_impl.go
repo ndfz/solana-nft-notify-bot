@@ -5,15 +5,16 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/ndfz/solana-nft-notify-bot/internal/storage"
 	"go.uber.org/zap"
 )
 
 type UserRepositoryImpl struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func New(db *sql.DB) UserRepositoryImpl {
+func New(db *sqlx.DB) UserRepositoryImpl {
 	return UserRepositoryImpl{
 		db: db,
 	}
@@ -21,7 +22,7 @@ func New(db *sql.DB) UserRepositoryImpl {
 
 func (u UserRepositoryImpl) Save(user storage.UserDTO) error {
 	var existingUserID uuid.UUID
-	err := u.db.QueryRow("SELECT id FROM users WHERE telegram_id = ?", user.TelegramID).Scan(&existingUserID)
+	err := u.db.QueryRow("SELECT id FROM users WHERE telegram_id = $1", user.TelegramID).Scan(&existingUserID)
 	if err != nil && err != sql.ErrNoRows {
 		return fmt.Errorf("error checking existing user: %v", err)
 	}
@@ -31,8 +32,7 @@ func (u UserRepositoryImpl) Save(user storage.UserDTO) error {
 		return storage.ErrUserExists
 	}
 
-	uuid := uuid.New()
-	_, err = u.db.Exec("INSERT INTO users (id, telegram_id) VALUES (?, ?)", uuid, user.TelegramID)
+	_, err = u.db.Exec("INSERT INTO users (telegram_id) VALUES ($1)", user.TelegramID)
 	if err != nil {
 		return fmt.Errorf("failed to save user: %v", err)
 	}
