@@ -3,8 +3,6 @@
 ![Static Badge](https://img.shields.io/badge/maintainer-ndfz-pink)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/ndfz/solana-nft-notify-bot)
 
-> This readme is a work in progress.
-
 A Telegram bot that monitors specific NFT collections you're interested in on the Magic Eden marketplace and notifies you about sales.
 
 ## Installation
