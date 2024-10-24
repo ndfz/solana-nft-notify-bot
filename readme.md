@@ -11,7 +11,7 @@ A Telegram bot that monitors specific NFT collections you're interested in on th
 
 + Clone the repository
     ```
-    git clone https://github.com/ndfz/solana-nft-notify-bot.git --depth=1
+    git clone https://github.com/tsukigatari/solana-nft-notify-bot.git --depth=1
     cd solana-nft-notify-bot
     ```
 + Rename `.env.example` to `.env` and fill in the details
